@@ -219,9 +219,9 @@ st.markdown("""
 
 # Constants
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-RESUME_FOLDER = "Resumes"
-JD_FOLDER = "JDs"
-DATABASE = "recruitment.db"
+RESUME_FOLDER = "https://github.com/Abdullah922-hash/Recruitement/blob/main/Resumes"
+JD_FOLDER = "https://github.com/Abdullah922-hash/Recruitement/blob/main/JDs"
+DATABASE = "https://github.com/Abdullah922-hash/Recruitement/blob/main/recruitment.db"
 
 load_dotenv()
 
