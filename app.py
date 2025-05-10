@@ -224,18 +224,39 @@ DATABASE = "recruitment.db"
 load_dotenv()
 
 def authenticate_gmail():
-    client_config = {
-        "installed": {
-            "client_id": st.secrets["google_oauth"]["client_id"],
-            "client_secret": st.secrets["google_oauth"]["client_secret"],
-            "auth_uri": st.secrets["google_oauth"]["auth_uri"],
-            "token_uri": st.secrets["google_oauth"]["token_uri"],
-            "redirect_uris": st.secrets["google_oauth"]["redirect_uris"]
-        }
-    }
+    creds = None
 
-    flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-    creds = flow.run_console()
+    # Check if token.pickle exists to load the credentials (this avoids re-authentication)
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+
+    # If no credentials or the credentials are invalid, initiate OAuth flow
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            # Load OAuth credentials from Streamlit Secrets
+            client_config = {
+                "installed": {
+                    "client_id": st.secrets["google_oauth"]["client_id"],
+                    "client_secret": st.secrets["google_oauth"]["client_secret"],
+                    "auth_uri": st.secrets["google_oauth"]["auth_uri"],
+                    "token_uri": st.secrets["google_oauth"]["token_uri"],
+                    "redirect_uris": st.secrets["google_oauth"]["redirect_uris"]
+                }
+            }
+
+            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+            
+            # Perform OAuth authentication in a headless environment
+            creds = flow.run_console()
+
+            # Save the credentials for future use
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
+    # Create Gmail API service object using the credentials
     service = build('gmail', 'v1', credentials=creds)
     return service
 
