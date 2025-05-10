@@ -224,42 +224,42 @@ DATABASE = "recruitment.db"
 
 load_dotenv()
 
-
 def authenticate_gmail():
-    # Access OAuth credentials from st.secrets
-    oauth_credentials = {
-        "client_id": st.secrets["google_oauth"]["client_id"],
-        "client_secret": st.secrets["google_oauth"]["client_secret"],
-        "token_uri": st.secrets["google_oauth"]["token_uri"],
-        "auth_uri": st.secrets["google_oauth"]["auth_uri"],
-        "redirect_uris": st.secrets["google_oauth"]["redirect_uris"]
-    }
+    try:
+        # Access OAuth credentials from st.secrets
+        oauth_credentials = {
+            "client_id": st.secrets["google_oauth"]["client_id"],
+            "client_secret": st.secrets["google_oauth"]["client_secret"],
+            "token_uri": st.secrets["google_oauth"]["token_uri"],
+            "auth_uri": st.secrets["google_oauth"]["auth_uri"],
+            "redirect_uris": st.secrets["google_oauth"]["redirect_uris"]
+        }
 
-    # Access Gmail token info from st.secrets
-    token_info = {
-        "token": st.secrets["gmail_token"]["token"],
-        "refresh_token": st.secrets["gmail_token"]["refresh_token"],
-        "token_uri": st.secrets["gmail_token"]["token_uri"],
-        "client_id": st.secrets["gmail_token"]["client_id"],
-        "client_secret": st.secrets["gmail_token"]["client_secret"],
-        "scopes": st.secrets["gmail_token"]["scopes"],
-        "expiry": st.secrets["gmail_token"]["expiry"]
-    }
+        # Access Gmail token info from st.secrets and parse it
+        token_info = json.loads(st.secrets["gmail_token"]["token_json"])
 
-    # Create credentials using the Gmail token info
-    creds = Credentials.from_authorized_user_info(token_info)
+        # Create credentials using the Gmail token info
+        creds = Credentials.from_authorized_user_info(token_info)
 
-    # If credentials are invalid or expired, attempt to refresh them
-    if not creds.valid:
-        if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            st.error("Token expired and can't be refreshed.")
-            st.stop()
+        # If credentials are invalid or expired, attempt to refresh them
+        if not creds.valid:
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                st.error("Token expired and can't be refreshed.")
+                st.stop()
 
-    # Create Gmail API service with the valid credentials
-    service = build('gmail', 'v1', credentials=creds)
-    return service
+        # Create Gmail API service with the valid credentials
+        service = build('gmail', 'v1', credentials=creds)
+        return service
+
+    except KeyError as e:
+        st.error(f"KeyError: Missing {e} in Streamlit secrets")
+        st.stop()
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        st.stop()
 
 def search_emails(service, subject_text="", after_date="", before_date=""):
     query = f'subject:"{subject_text}"'
