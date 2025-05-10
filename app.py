@@ -415,9 +415,17 @@ def init_db():
         username TEXT PRIMARY KEY,
         password TEXT
     )''')
-    c.execute("INSERT OR IGNORE INTO admin (username, password) VALUES (?, ?)", ("admin", "123"))
-    conn.commit()
+    # Check if the admin user exists
+    c.execute("SELECT * FROM admin WHERE username = ?", ("admin",))
+    result = c.fetchone()
+    
+    # Insert default admin user if it doesn't exist
+    if not result:
+        c.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ("admin", "123"))
+        conn.commit()
+    
     conn.close()
+
 
 def store_analysis(name, email, mobile, strengths, score, recommendation, gaps, resume_path, job_title):
     status = "Shortlisted" if float(score) >= 5 else "Rejected"
