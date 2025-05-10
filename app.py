@@ -14,6 +14,7 @@ import re
 from pdfminer.high_level import extract_text as extract_pdf_text
 from docx import Document
 import shutil
+import json
 
 # Streamlit page config
 st.set_page_config(page_title="AI Recruitment", layout="wide")
