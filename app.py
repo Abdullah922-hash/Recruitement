@@ -385,7 +385,7 @@ Ensure the score reflects the actual fit, avoiding inflated ratings unless fully
 def init_db():
 
     url = "https://raw.githubusercontent.com/Abdullah922-hash/Recruitement/main/recruitment.db"
-    local_db = "/mount/recruitment.db"
+    local_db = "/tmp/recruitment.db"
 
     # Download DB if not present
     if not os.path.exists(local_db):
