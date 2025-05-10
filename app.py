@@ -235,7 +235,7 @@ def authenticate_gmail():
     }
 
     flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-    creds = flow.run_local_server(port=0)
+    creds = flow.run_console()
     service = build('gmail', 'v1', credentials=creds)
     return service
 
