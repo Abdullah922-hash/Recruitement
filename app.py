@@ -217,8 +217,8 @@ st.markdown("""
 
 # Constants
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-RESUME_FOLDER = r'C:\Users\PMLS\Desktop\Recruitment product updated 2 - new code\Resumes'
-JD_FOLDER = r'C:\Users\PMLS\Desktop\Recruitment product updated 2 - new code\JDs'
+RESUME_FOLDER = "Resumes"
+JD_FOLDER = "JDs"
 DATABASE = "recruitment.db"
 
 load_dotenv()
@@ -312,7 +312,7 @@ def extract_resume_info(file_path):
         return None
 
 def analyze_resume_with_gpt(resume_info, job_description):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = st.secrets["openai"]["api_key"]
     if not openai.api_key:
         st.error("OpenAI API key not found in environment variables.")
         return "Score: 0\nRecommendation: Analysis failed due to missing API key\nStrengths: None\nGaps: None"
