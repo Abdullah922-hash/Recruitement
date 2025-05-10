@@ -312,7 +312,7 @@ def extract_resume_info(file_path):
         return None
 
 def analyze_resume_with_gpt(resume_info, job_description):
-    openai.api_key = st.secrets["openai"]["api_key"]
+    openai.api_key = st.secrets["openai"]["OPENAI_API_KEY"]
     if not openai.api_key:
         st.error("OpenAI API key not found in environment variables.")
         return "Score: 0\nRecommendation: Analysis failed due to missing API key\nStrengths: None\nGaps: None"
