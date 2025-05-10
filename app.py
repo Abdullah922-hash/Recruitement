@@ -381,6 +381,14 @@ Ensure the score reflects the actual fit, avoiding inflated ratings unless fully
         return f"Score: 0\nRecommendation: Analysis failed due to {str(e)}\nStrengths: None\nGaps: None"
 
 def init_db():
+
+    url = "https://raw.githubusercontent.com/Abdullah922-hash/Recruitement/main/recruitment.db"
+    local_db = "/mount/recruitment.db"
+
+    # Download DB if not present
+    if not os.path.exists(local_db):
+        urllib.request.urlretrieve(url, local_db)
+        
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS analysis (
