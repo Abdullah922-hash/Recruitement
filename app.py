@@ -224,41 +224,22 @@ DATABASE = "recruitment.db"
 load_dotenv()
 
 def authenticate_gmail():
-    creds = None
+    # Load the JSON stored in Streamlit secrets
+    token_info = json.loads(st.secrets["gmail_token"]["token_json"])
 
-    # Check if token.pickle exists to load the credentials (this avoids re-authentication)
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
+    # Create credentials from the loaded JSON
+    creds = Credentials.from_authorized_user_info(token_info)
 
-    # If no credentials or the credentials are invalid, initiate OAuth flow
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    # Check if the credentials are valid, and refresh if necessary
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            # Load OAuth credentials from Streamlit Secrets
-            client_config = {
-                "installed": {
-                    "client_id": st.secrets["google_oauth"]["client_id"],
-                    "client_secret": st.secrets["google_oauth"]["client_secret"],
-                    "auth_uri": st.secrets["google_oauth"]["auth_uri"],
-                    "token_uri": st.secrets["google_oauth"]["token_uri"],
-                    "redirect_uris": st.secrets["google_oauth"]["redirect_uris"]
-                }
-            }
+            st.error("Token expired and can't be refreshed.")
+            st.stop()
 
-            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            
-            # Perform OAuth authentication in a headless environment
-            creds = flow.run_console()
-
-            # Save the credentials for future use
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
-
-    # Create Gmail API service object using the credentials
-    service = build('gmail', 'v1', credentials=creds)
-    return service
+    # Return the Gmail API service
+    return build('gmail', 'v1', credentials=creds)
 
 def search_emails(service, subject_text="", after_date="", before_date=""):
     query = f'subject:"{subject_text}"'
