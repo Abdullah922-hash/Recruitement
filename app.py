@@ -223,7 +223,7 @@ st.markdown("""
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 RESUME_FOLDER = "https://github.com/Abdullah922-hash/Recruitement/blob/main/Resumes"
 JD_FOLDER = "https://github.com/Abdullah922-hash/Recruitement/blob/main/JDs"
-DATABASE = "https://raw.githubusercontent.com/Abdullah922-hash/Recruitement/main/recruitment.db"
+DATABASE = "/tmp/recruitment.db"
 
 load_dotenv()
 
@@ -383,16 +383,22 @@ Ensure the score reflects the actual fit, avoiding inflated ratings unless fully
         return f"Score: 0\nRecommendation: Analysis failed due to {str(e)}\nStrengths: None\nGaps: None"
 
 def init_db():
-
+    # URL to the raw GitHub-hosted SQLite database
     url = "https://raw.githubusercontent.com/Abdullah922-hash/Recruitement/main/recruitment.db"
-    local_db = "/tmp/recruitment.db"
 
-    # Download DB if not present
-    if not os.path.exists(local_db):
-        urllib.request.urlretrieve(url, local_db)
-        
+    # Download the DB only if it doesn't already exist
+    if not os.path.exists(DATABASE):
+        try:
+            urllib.request.urlretrieve(url, DATABASE)
+        except Exception as e:
+            print(f"Error downloading database: {e}")
+            return  # Exit if download fails
+
+    # Connect to the local database
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
+
+    # Create tables if they don't exist
     c.execute('''CREATE TABLE IF NOT EXISTS analysis (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE,
@@ -407,6 +413,7 @@ def init_db():
         job_title TEXT,
         date_added DATE DEFAULT CURRENT_DATE
     )''')
+
     c.execute('''CREATE TABLE IF NOT EXISTS analysis2 (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
@@ -421,19 +428,18 @@ def init_db():
         job_title TEXT,
         date_added DATE DEFAULT CURRENT_DATE
     )''')
+
     c.execute('''CREATE TABLE IF NOT EXISTS admin (
         username TEXT PRIMARY KEY,
         password TEXT
     )''')
-    # Check if the admin user exists
+
+    # Insert default admin user if not exists
     c.execute("SELECT * FROM admin WHERE username = ?", ("admin",))
-    result = c.fetchone()
-    
-    # Insert default admin user if it doesn't exist
-    if not result:
+    if not c.fetchone():
         c.execute("INSERT INTO admin (username, password) VALUES (?, ?)", ("admin", "123"))
         conn.commit()
-    
+
     conn.close()
 
 
